@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-
+import.meta.env.VITE_AUTH_url
 function AppSearch() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
@@ -11,6 +11,8 @@ function AppSearch() {
   const [darkMode, setDarkMode] = useState(false);
   const dropdownRef = useRef();
   const url = import.meta.env.VITE_AUTH_url;
+  const baseUrl = "https://store-fvkou79p1-jayants-projects-e1fe5e24.vercel.app";
+  
 
   const countryOptions = [
     { code: "us", name: "United States" },
@@ -49,8 +51,8 @@ function AppSearch() {
 
     const url =
       platform === "playstore"
-        ? `http://localhost:3000/search?query=${searchQuery}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`
-        : `http://localhost:3000/api/appstore/search?query=${searchQuery}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`;
+        ? `${baseUrl}/search?query=${searchQuery}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`
+        : `${baseUrl}/search?query=${searchQuery}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`;
 
     try {
       const res = await fetch(url);
@@ -66,8 +68,8 @@ function AppSearch() {
 
     const url =
       platform === "playstore"
-        ? `http://localhost:3000/suggest?term=${value}`
-        : `http://localhost:3000/api/appstore/suggestions?query=${value}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`;
+        ? `${baseUrl}/suggest?term=${value}`
+        : `${baseUrl}/suggestions?query=${value}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`;
 
     try {
       const res = await fetch(url);
@@ -85,11 +87,11 @@ function AppSearch() {
       let fallbackInstallUrl = "";
 
       if (platform === "playstore") {
-        url = `http://localhost:3000/appdetail?id=${app.appId}`;
-        fallbackInstallUrl = `https://play.google.com/store/apps/details?id=${app.appId}`;
+        url = `${baseUrl}/appdetail?id=${app.appId}`;
+        fallbackInstallUrl = `${baseUrl}/details?id=${app.appId}`;
       } else {
-        url = `http://localhost:3000/detail?platform=appstore&id=${app.id}`;
-        fallbackInstallUrl = `https://apps.apple.com/app/id${app.id}`;
+        url = `${baseUrl}/detail?platform=appstore&id=${app.id}`;
+        fallbackInstallUrl = `${baseUrl}/app/id${app.id}`;
       }
 
       const res = await fetch(url);
