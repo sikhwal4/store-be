@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+
 function AppSearch() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
@@ -9,9 +10,9 @@ function AppSearch() {
   const [selectedApp, setSelectedApp] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
   const dropdownRef = useRef();
-  const URL_BASE = import.meta.env.VITE_AUTH_url;
-  console.log(URL_BASE)
-  
+
+  const URL_BASE = import.meta.env.VITE_AUTH_url || "https://your-backup-api-url.com";
+  console.log("API Base URL:", URL_BASE);
 
   const countryOptions = [
     { code: "us", name: "United States" },
@@ -48,35 +49,36 @@ function AppSearch() {
     setSelectedApp(null);
     setSuggestions([]);
 
-    const url =
-      platform === "playstore"
-        ? `${URL_BASE}/search?query=${searchQuery}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`
-        : `${URL_BASE}/search?query=${searchQuery}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`;
+    const url = `${URL_BASE}/search?query=${searchQuery}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`;
 
     try {
-      const res = await fetch(URL_BASE);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Search fetch failed");
       const data = await res.json();
       setResults(data.results || []);
     } catch (err) {
-      console.error("Search error:", err);
+      console.error("Search error:", err.message);
     }
   };
 
   const fetchSuggestions = async (value) => {
     if (!value.trim()) return;
 
-    const url =
-      platform === "playstore"
-        ? `${URL_BASE}/suggest?term=${value}`
-        : `${URL_BASE}/suggestions?query=${value}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`;
+    const url = platform === "playstore"
+      ? `${URL_BASE}/suggest?term=${value}`
+      : `${URL_BASE}/suggestions?query=${value}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`;
 
     try {
       const res = await fetch(url);
+      const contentType = res.headers.get("content-type");
+      if (!res.ok || !contentType.includes("application/json")) {
+        throw new Error("Invalid suggestion response");
+      }
       const data = await res.json();
       const list = platform === "playstore" ? data.results : data.suggestions;
       setSuggestions(list || []);
     } catch (err) {
-      console.error("Suggestions error:", err);
+      console.error("Suggestions error:", err.message);
     }
   };
 
@@ -86,19 +88,20 @@ function AppSearch() {
       let fallbackInstallUrl = "";
 
       if (platform === "playstore") {
-        url = `${url}/appdetail?id=${app.appId}`;
-        fallbackInstallUrl = `${url}/details?id=${app.appId}`;
+        url = `${URL_BASE}/appdetail?id=${app.appId}`;
+        fallbackInstallUrl = `https://play.google.com/store/apps/details?id=${app.appId}`;
       } else {
-        url = `${url}/detail?platform=appstore&id=${app.id}`;
-        fallbackInstallUrl = `${url}/app/id${app.id}`;
+        url = `${URL_BASE}/detail?platform=appstore&id=${app.id}`;
+        fallbackInstallUrl = `https://apps.apple.com/app/id${app.id}`;
       }
 
       const res = await fetch(url);
+      if (!res.ok) throw new Error("App detail fetch failed");
       const data = await res.json();
       data.url = data.url || fallbackInstallUrl;
       setSelectedApp(data);
     } catch (err) {
-      console.error("Failed to fetch app detail:", err);
+      console.error("Failed to fetch app detail:", err.message);
     }
   };
 
@@ -128,9 +131,7 @@ function AppSearch() {
             <select className="form-select" value={country} onChange={(e) => setCountry(e.target.value)}>
               <option value="">Select Country</option>
               {countryOptions.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.name}
-                </option>
+                <option key={c.code} value={c.code}>{c.name}</option>
               ))}
             </select>
           </div>
@@ -140,9 +141,7 @@ function AppSearch() {
             <select className="form-select" value={language} onChange={(e) => setLanguage(e.target.value)}>
               <option value="">Select Language</option>
               {languageOptions.map((l) => (
-                <option key={l.code} value={l.code}>
-                  {l.name}
-                </option>
+                <option key={l.code} value={l.code}>{l.name}</option>
               ))}
             </select>
           </div>
@@ -156,9 +155,7 @@ function AppSearch() {
                 onChange={handleInputChange}
                 placeholder="Search for apps..."
               />
-              <button className="btn btn-primary" onClick={() => handleSearch(query)}>
-                Search
-              </button>
+              <button className="btn btn-primary" onClick={() => handleSearch(query)}>Search</button>
             </div>
 
             {suggestions.length > 0 && (
