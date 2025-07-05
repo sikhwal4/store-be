@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import.meta.env.VITE_AUTH_url
 function AppSearch() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
@@ -11,6 +10,7 @@ function AppSearch() {
   const [darkMode, setDarkMode] = useState(false);
   const dropdownRef = useRef();
   const URL_BASE = import.meta.env.VITE_AUTH_url;
+  console.log(URL_BASE)
   
 
   const countryOptions = [
