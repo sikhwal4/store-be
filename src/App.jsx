@@ -10,8 +10,7 @@ function AppSearch() {
   const [selectedApp, setSelectedApp] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
   const dropdownRef = useRef();
-  const url = import.meta.env.VITE_AUTH_url;
-  const baseUrl = "https://store-fvkou79p1-jayants-projects-e1fe5e24.vercel.app";
+  const URL_BASE = import.meta.env.VITE_AUTH_url;
   
 
   const countryOptions = [
@@ -51,11 +50,11 @@ function AppSearch() {
 
     const url =
       platform === "playstore"
-        ? `${baseUrl}/search?query=${searchQuery}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`
-        : `${baseUrl}/search?query=${searchQuery}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`;
+        ? `${URL_BASE}/search?query=${searchQuery}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`
+        : `${URL_BASE}/search?query=${searchQuery}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`;
 
     try {
-      const res = await fetch(url);
+      const res = await fetch(URL_BASE);
       const data = await res.json();
       setResults(data.results || []);
     } catch (err) {
@@ -68,8 +67,8 @@ function AppSearch() {
 
     const url =
       platform === "playstore"
-        ? `${baseUrl}/suggest?term=${value}`
-        : `${baseUrl}/suggestions?query=${value}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`;
+        ? `${URL_BASE}/suggest?term=${value}`
+        : `${URL_BASE}/suggestions?query=${value}${country ? `&country=${country}` : ""}${language ? `&lang=${language}` : ""}`;
 
     try {
       const res = await fetch(url);
@@ -87,11 +86,11 @@ function AppSearch() {
       let fallbackInstallUrl = "";
 
       if (platform === "playstore") {
-        url = `${baseUrl}/appdetail?id=${app.appId}`;
-        fallbackInstallUrl = `${baseUrl}/details?id=${app.appId}`;
+        url = `${url}/appdetail?id=${app.appId}`;
+        fallbackInstallUrl = `${url}/details?id=${app.appId}`;
       } else {
-        url = `${baseUrl}/detail?platform=appstore&id=${app.id}`;
-        fallbackInstallUrl = `${baseUrl}/app/id${app.id}`;
+        url = `${url}/detail?platform=appstore&id=${app.id}`;
+        fallbackInstallUrl = `${url}/app/id${app.id}`;
       }
 
       const res = await fetch(url);
